@@ -54,7 +54,7 @@ export default async () => {
   // 롤백 함수 정의
   const rollback = async () => {
     console.log(chalk.yellow('\n🔄 Rolling back changes...'))
-    
+
     try {
       // 삭제된 파일들 복원
       for (const file of deletedFiles) {
@@ -156,13 +156,13 @@ export default async () => {
         files.forEach(file => {
           const filePath = path.join(dirPath, file)
           const stat = fs.statSync(filePath)
-          
+
           if (stat.isDirectory()) {
             backupFiles(filePath)
           } else {
             deletedFiles.push({
               path: filePath,
-              content: fs.readFileSync(filePath, 'utf-8')
+              content: fs.readFileSync(filePath, 'utf-8'),
             })
           }
         })
@@ -171,18 +171,18 @@ export default async () => {
       // schema.ts와 apis.ts 백업
       const schemaPath = path.join(process.cwd(), 'src/graphql/schema.ts')
       const apisPath = path.join(process.cwd(), 'src/graphql/apis.ts')
-      
+
       if (fs.existsSync(schemaPath)) {
         modifiedFiles.push({
           path: schemaPath,
-          content: fs.readFileSync(schemaPath, 'utf-8')
+          content: fs.readFileSync(schemaPath, 'utf-8'),
         })
       }
-      
+
       if (fs.existsSync(apisPath)) {
         modifiedFiles.push({
           path: apisPath,
-          content: fs.readFileSync(apisPath, 'utf-8')
+          content: fs.readFileSync(apisPath, 'utf-8'),
         })
       }
 
@@ -202,10 +202,6 @@ export default async () => {
         const { stdout, stderr } = await execPromise('npm run generate', {
           shell: 'bash',
         })
-
-        if (stderr) {
-          throw new Error(`Type generation failed: ${stderr}`)
-        }
 
         // apis.ts 업데이트
         await updateApisFile()
@@ -240,6 +236,11 @@ export default async () => {
         console.log('\n')
         deletedTable.printTable()
 
+        // if (stderr) {
+        //   console.log('\n')
+        //   console.log(chalk.yellow('⚠️  Warnings:'))
+        //   console.log(chalk.dim(stderr))
+        // }
       } catch (error) {
         // 작업 중 에러 발생 시 롤백
         await rollback()

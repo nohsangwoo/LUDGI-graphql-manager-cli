@@ -247,11 +247,11 @@ export default gql\`
     console.log(chalk.green(`✅ Complete in ${duration}s`))
     console.log(chalk.blue(`📍 Location: ${chalk.underline(domainPath)}`))
 
-    if (stderr) {
-      console.log('\n')
-      console.log(chalk.yellow('⚠️  Warnings:'))
-      console.log(chalk.dim(stderr))
-    }
+    // if (stderr) {
+    //   console.log('\n')
+    //   console.log(chalk.yellow('⚠️  Warnings:'))
+    //   console.log(chalk.dim(stderr))
+    // }
   } catch (error) {
     console.log('\n')
     console.error(chalk.red.bold('❌ Error creating GraphQL resource:'))
