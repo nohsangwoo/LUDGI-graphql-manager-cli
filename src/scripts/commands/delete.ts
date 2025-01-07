@@ -47,6 +47,36 @@ ${directories.join(',\n')}
 }
 
 export default async () => {
+  // 롤백을 위한 상태 추적
+  const deletedFiles: { path: string; content: string }[] = []
+  const modifiedFiles: { path: string; content: string }[] = []
+
+  // 롤백 함수 정의
+  const rollback = async () => {
+    console.log(chalk.yellow('\n🔄 Rolling back changes...'))
+    
+    try {
+      // 삭제된 파일들 복원
+      for (const file of deletedFiles) {
+        const dir = path.dirname(file.path)
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true })
+        }
+        fs.writeFileSync(file.path, file.content)
+      }
+
+      // 수정된 파일들 복원
+      for (const file of modifiedFiles) {
+        fs.writeFileSync(file.path, file.content)
+      }
+
+      console.log(chalk.green('✅ Rollback completed'))
+    } catch (rollbackError) {
+      console.error(chalk.red.bold('❌ Error during rollback:'))
+      console.error(chalk.red(rollbackError))
+    }
+  }
+
   try {
     console.log('\n')
     console.log(chalk.red.bold('🗑️  Delete GraphQL Resource'))
@@ -120,55 +150,101 @@ export default async () => {
     if (confirmation === 'delete') {
       const resourcePath = path.join(graphqlPath, selectedResource)
 
+      // 삭제 전 파일들 백업
+      const backupFiles = (dirPath: string) => {
+        const files = fs.readdirSync(dirPath)
+        files.forEach(file => {
+          const filePath = path.join(dirPath, file)
+          const stat = fs.statSync(filePath)
+          
+          if (stat.isDirectory()) {
+            backupFiles(filePath)
+          } else {
+            deletedFiles.push({
+              path: filePath,
+              content: fs.readFileSync(filePath, 'utf-8')
+            })
+          }
+        })
+      }
+
+      // schema.ts와 apis.ts 백업
+      const schemaPath = path.join(process.cwd(), 'src/graphql/schema.ts')
+      const apisPath = path.join(process.cwd(), 'src/graphql/apis.ts')
+      
+      if (fs.existsSync(schemaPath)) {
+        modifiedFiles.push({
+          path: schemaPath,
+          content: fs.readFileSync(schemaPath, 'utf-8')
+        })
+      }
+      
+      if (fs.existsSync(apisPath)) {
+        modifiedFiles.push({
+          path: apisPath,
+          content: fs.readFileSync(apisPath, 'utf-8')
+        })
+      }
+
+      // 삭제할 리소스 백업
+      backupFiles(resourcePath)
+
       console.log(chalk.yellow('\n🗑️  Removing files...'))
       fs.rmSync(resourcePath, { recursive: true })
 
-      // schema.ts 파일 업데이트
-      await updateSchemaFile()
-      console.log('schema.ts updated')
+      try {
+        // schema.ts 파일 업데이트
+        await updateSchemaFile()
+        console.log('schema.ts updated')
 
-      // npm run generate 실행
-      console.log(chalk.yellow('\n📦 Updating GraphQL types...'))
-      const { stdout, stderr } = await execPromise('npm run generate', {
-        shell: 'bash',
-      })
+        // npm run generate 실행
+        console.log(chalk.yellow('\n📦 Updating GraphQL types...'))
+        const { stdout, stderr } = await execPromise('npm run generate', {
+          shell: 'bash',
+        })
 
-      if (stderr) {
-        console.log(chalk.yellow('\n⚠️  Generation warnings:'))
-        console.log(chalk.dim(stderr))
+        if (stderr) {
+          throw new Error(`Type generation failed: ${stderr}`)
+        }
+
+        // apis.ts 업데이트
+        await updateApisFile()
+
+        // 성공 메시지 및 테이블 출력
+        console.log('\n')
+        console.log(chalk.green.bold('✨ Resource Deletion Complete!'))
+        console.log(chalk.dim('====================================='))
+        console.log(chalk.green(`✅ Successfully removed: ${selectedResource}`))
+
+        // 삭제된 파일 정보 표시
+        const deletedTable = new Table({
+          columns: [
+            { name: 'action', title: 'Action', alignment: 'left' },
+            { name: 'status', title: 'Status', alignment: 'center' },
+          ],
+        })
+
+        deletedTable.addRow({
+          action: `Remove ${selectedResource} directory`,
+          status: '✅',
+        })
+        deletedTable.addRow({
+          action: 'Update GraphQL types',
+          status: '✅',
+        })
+        deletedTable.addRow({
+          action: 'Update APIs file',
+          status: '✅',
+        })
+
+        console.log('\n')
+        deletedTable.printTable()
+
+      } catch (error) {
+        // 작업 중 에러 발생 시 롤백
+        await rollback()
+        throw error
       }
-
-      // apis.ts 업데이트
-      await updateApisFile()
-
-      console.log('\n')
-      console.log(chalk.green.bold('✨ Resource Deletion Complete!'))
-      console.log(chalk.dim('====================================='))
-      console.log(chalk.green(`✅ Successfully removed: ${selectedResource}`))
-
-      // 삭제된 파일 정보 표시
-      const deletedTable = new Table({
-        columns: [
-          { name: 'action', title: 'Action', alignment: 'left' },
-          { name: 'status', title: 'Status', alignment: 'center' },
-        ],
-      })
-
-      deletedTable.addRow({
-        action: `Remove ${selectedResource} directory`,
-        status: '✅',
-      })
-      deletedTable.addRow({
-        action: 'Update GraphQL types',
-        status: '✅',
-      })
-      deletedTable.addRow({
-        action: 'Update APIs file',
-        status: '✅',
-      })
-
-      console.log('\n')
-      deletedTable.printTable()
     } else {
       console.log(chalk.yellow('\n⚠️  Deletion cancelled'))
     }
@@ -176,5 +252,6 @@ export default async () => {
     console.log('\n')
     console.error(chalk.red.bold('❌ Error deleting GraphQL resource:'))
     console.error(chalk.red(error))
+    process.exit(1)
   }
 }
