@@ -136,13 +136,24 @@ const create = async (options: CreateOptions) => {
     const files = [
       {
         name: `${name}.graphql`,
-        content: `${type} ${name} {
-  ${name} {
+        content: `${type} ${name}(
+  $id: Int!
+  $isActive: Boolean!
+  $description: String!
+  $amount: Float!
+) {
+  ${name}(
+    id: $id
+    isActive: $isActive
+    description: $description
+    amount: $amount
+  ) {
     title
     price
     isAvailable
   }
-}\n`,
+}
+\n`,
       },
       {
         name: `${name}.resolvers.ts`,
@@ -180,7 +191,12 @@ export default gql\`
   }
 
   type ${capitalize(type)} {
-    ${name}: ${name}Result!
+    ${name}(
+      id: Int!
+      isActive: Boolean!
+      description: String!
+      amount: Float!
+    ): ${name}Result!
   }
 \`\n`,
       },
