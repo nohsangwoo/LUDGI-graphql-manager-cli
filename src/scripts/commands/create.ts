@@ -29,7 +29,7 @@ const updateApisFile = async () => {
   const apisContent = `import { GraphQLClient } from 'graphql-request'
 import { getSdk } from '../generated/graphql'
 
-const API_URL = '/graphql'
+const API_URL = \`\${process.env.NEXT_PUBLIC_API_URL}/graphql\`
 const gqlClient = new GraphQLClient(API_URL)
 
 export const { 
