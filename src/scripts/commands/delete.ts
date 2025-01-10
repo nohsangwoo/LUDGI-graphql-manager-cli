@@ -32,10 +32,11 @@ const updateApisFile = async () => {
     .filter(item => fs.statSync(path.join(graphqlPath, item)).isDirectory())
     .map(dir => `  ${dir}`)
 
+  // apis.ts 파일 내용 업데이트
   const apisContent = `import { GraphQLClient } from 'graphql-request'
 import { getSdk } from '../generated/graphql'
 
-const API_URL = '/graphql'
+const API_URL = \`\${process.env.NEXT_PUBLIC_API_URL}/graphql\`
 const gqlClient = new GraphQLClient(API_URL)
 
 export const { 
