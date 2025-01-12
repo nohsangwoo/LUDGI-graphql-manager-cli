@@ -28,8 +28,8 @@ const updateApisFile = async () => {
   // apis.ts 파일 내용 업데이트
   const apisContent = `import { GraphQLClient } from 'graphql-request'
 import { getSdk } from '../generated/graphql'
+import { API_URL } from '@/libs/server/consts'
 
-const API_URL = \`\${process.env.NEXT_PUBLIC_API_URL}/graphql\`
 const gqlClient = new GraphQLClient(API_URL)
 
 export const { 
