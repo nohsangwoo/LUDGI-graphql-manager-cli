@@ -29,7 +29,10 @@ const updateApisFile = async () => {
 
   const directories = fs
     .readdirSync(graphqlPath)
-    .filter(item => fs.statSync(path.join(graphqlPath, item)).isDirectory())
+    .filter(item => {
+      const isDirectory = fs.statSync(path.join(graphqlPath, item)).isDirectory()
+      return isDirectory && item !== 'types' // types 디렉토리 제외
+    })
     .map(dir => `  ${dir}`)
 
   // apis.ts 파일 내용 업데이트
@@ -86,7 +89,10 @@ const deleteGraphql = async () => {
     const graphqlPath = path.join(process.cwd(), 'src/graphql')
     const directories = fs
       .readdirSync(graphqlPath)
-      .filter(item => fs.statSync(path.join(graphqlPath, item)).isDirectory())
+      .filter(item => {
+        const isDirectory = fs.statSync(path.join(graphqlPath, item)).isDirectory()
+        return isDirectory && item !== 'types' // types 디렉토리 제외
+      })
 
     if (directories.length === 0) {
       console.log(chalk.yellow('\nℹ️  No GraphQL resources found'))
