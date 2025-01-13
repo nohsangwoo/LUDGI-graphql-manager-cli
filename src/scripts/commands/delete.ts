@@ -30,7 +30,9 @@ const updateApisFile = async () => {
   const directories = fs
     .readdirSync(graphqlPath)
     .filter(item => {
-      const isDirectory = fs.statSync(path.join(graphqlPath, item)).isDirectory()
+      const isDirectory = fs
+        .statSync(path.join(graphqlPath, item))
+        .isDirectory()
       return isDirectory && item !== 'types' // types 디렉토리 제외
     })
     .map(dir => `  ${dir}`)
@@ -87,12 +89,12 @@ const deleteGraphql = async () => {
     console.log(chalk.dim('====================================='))
 
     const graphqlPath = path.join(process.cwd(), 'src/graphql')
-    const directories = fs
-      .readdirSync(graphqlPath)
-      .filter(item => {
-        const isDirectory = fs.statSync(path.join(graphqlPath, item)).isDirectory()
-        return isDirectory && item !== 'types' // types 디렉토리 제외
-      })
+    const directories = fs.readdirSync(graphqlPath).filter(item => {
+      const isDirectory = fs
+        .statSync(path.join(graphqlPath, item))
+        .isDirectory()
+      return isDirectory && item !== 'types' // types 디렉토리 제외
+    })
 
     if (directories.length === 0) {
       console.log(chalk.yellow('\nℹ️  No GraphQL resources found'))
@@ -136,6 +138,7 @@ const deleteGraphql = async () => {
         name: 'selectedResource',
         message: 'Select a resource to delete:',
         choices: directories,
+        loop: false, // 목록 순환 비활성화
       },
     ])
 
@@ -217,9 +220,7 @@ const deleteGraphql = async () => {
         console.log('\n')
         console.log(chalk.green.bold('✨ Resource Deletion Complete!'))
         console.log(chalk.dim('====================================='))
-        console.log(
-          chalk.green(`✅ Successfully removed: ${selectedResource}`),
-        )
+        console.log(chalk.green(`✅ Successfully removed: ${selectedResource}`))
 
         // 삭제된 파일 정보 표시
         const deletedTable = new Table({

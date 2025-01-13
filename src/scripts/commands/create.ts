@@ -7,7 +7,7 @@ import { Table } from 'console-table-printer'
 import chalk from 'chalk'
 import updateSchemaFile from './helper/updateSchemaFile'
 interface CreateOptions {
-  name: string;
+  name: string
 }
 
 const execPromise = promisify(exec)
@@ -22,7 +22,12 @@ const updateApisFile = async () => {
   // 디렉토리만 필터링
   const directories = fs
     .readdirSync(graphqlPath)
-    .filter(item => fs.statSync(path.join(graphqlPath, item)).isDirectory())
+    .filter(item => {
+      const isDirectory = fs
+        .statSync(path.join(graphqlPath, item))
+        .isDirectory()
+      return isDirectory && item !== 'types' // types 디렉토리 제외
+    })
     .map(dir => `  ${dir}`)
 
   // apis.ts 파일 내용 업데이트
@@ -158,7 +163,9 @@ const create = async (options: CreateOptions) => {
       {
         name: `${name}.resolvers.ts`,
         content: `import type { Context } from '@/graphql/type'
-import { ${capitalize(name)}${capitalize(type)}Variables } from '@/generated/graphql'
+import { ${capitalize(name)}${capitalize(
+          type,
+        )}Variables } from '@/generated/graphql'
 
 const resolvers = {
   ${capitalize(type)}: {
