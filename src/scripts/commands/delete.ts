@@ -47,7 +47,7 @@ ${directories.join(',\n')}
   fs.writeFileSync(apisPath, apisContent)
 }
 
-export default async () => {
+const deleteGraphql = async () => {
   // 롤백을 위한 상태 추적
   const deletedFiles: { path: string; content: string }[] = []
   const modifiedFiles: { path: string; content: string }[] = []
@@ -211,7 +211,9 @@ export default async () => {
         console.log('\n')
         console.log(chalk.green.bold('✨ Resource Deletion Complete!'))
         console.log(chalk.dim('====================================='))
-        console.log(chalk.green(`✅ Successfully removed: ${selectedResource}`))
+        console.log(
+          chalk.green(`✅ Successfully removed: ${selectedResource}`),
+        )
 
         // 삭제된 파일 정보 표시
         const deletedTable = new Table({
@@ -257,3 +259,5 @@ export default async () => {
     process.exit(1)
   }
 }
+
+export default deleteGraphql

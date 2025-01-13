@@ -7,7 +7,7 @@ import { Table } from 'console-table-printer'
 import chalk from 'chalk'
 import updateSchemaFile from './helper/updateSchemaFile'
 interface CreateOptions {
-  name: string
+  name: string;
 }
 
 const execPromise = promisify(exec)
@@ -44,7 +44,7 @@ const create = async (options: CreateOptions) => {
   const { name } = options
   const graphqlPath = path.join(process.cwd(), 'src/graphql')
   const domainPath = path.join(graphqlPath, name)
-  
+
   // 롤백을 위한 상태 추적
   const createdPaths: string[] = []
   const originalFiles: { path: string; content: string | null }[] = []
@@ -52,7 +52,7 @@ const create = async (options: CreateOptions) => {
   // 롤백 함수 정의
   const rollback = async () => {
     console.log(chalk.yellow('\n🔄 Rolling back changes...'))
-    
+
     // 생성된 파일/디렉토리 제거
     for (const path of createdPaths.reverse()) {
       if (fs.existsSync(path)) {
@@ -82,18 +82,18 @@ const create = async (options: CreateOptions) => {
     // 도메인 디렉토리 생성 전에 schema.ts와 apis.ts 백업
     const schemaPath = path.join(process.cwd(), 'src/graphql/schema.ts')
     const apisPath = path.join(process.cwd(), 'src/graphql/apis.ts')
-    
+
     if (fs.existsSync(schemaPath)) {
       originalFiles.push({
         path: schemaPath,
-        content: fs.readFileSync(schemaPath, 'utf-8')
+        content: fs.readFileSync(schemaPath, 'utf-8'),
       })
     }
-    
+
     if (fs.existsSync(apisPath)) {
       originalFiles.push({
         path: apisPath,
-        content: fs.readFileSync(apisPath, 'utf-8')
+        content: fs.readFileSync(apisPath, 'utf-8'),
       })
     }
 
@@ -158,14 +158,12 @@ const create = async (options: CreateOptions) => {
       {
         name: `${name}.resolvers.ts`,
         content: `import type { Context } from '@/graphql/type'
-import { ${capitalize(name)}${capitalize(
-          type,
-        )}Variables } from '@/generated/graphql'
+import { ${capitalize(name)}${capitalize(type)}Variables } from '@/generated/graphql'
 
-export default {
+const resolvers = {
   ${capitalize(type)}: {
     ${name}: async (
-      _parent: any,
+      _parent: unknown,
       args: ${capitalize(name)}${capitalize(type)}Variables,
       context: Context,
     ) => {
@@ -177,7 +175,10 @@ export default {
       }
     },
   },
-}\n`,
+}\n
+
+export default resolvers
+`,
       },
       {
         name: `${name}.typeDefs.ts`,
@@ -272,7 +273,7 @@ export default gql\`
     console.log('\n')
     console.error(chalk.red.bold('❌ Error creating GraphQL resource:'))
     console.error(chalk.red(error))
-    
+
     // 롤백 실행
     try {
       await rollback()
@@ -280,7 +281,7 @@ export default gql\`
       console.error(chalk.red.bold('❌ Error during rollback:'))
       console.error(chalk.red(rollbackError))
     }
-    
+
     process.exit(1)
   }
 }
