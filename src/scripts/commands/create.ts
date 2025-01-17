@@ -119,6 +119,10 @@ const create = async (options: CreateOptions) => {
             name: 'Mutation - Write operations (Create/Update/Delete)',
             value: 'mutation',
           },
+          {
+            name: 'Subscription - Real-time updates',
+            value: 'subscription',
+          },
         ],
         default: 'query',
       },
@@ -137,11 +141,22 @@ const create = async (options: CreateOptions) => {
     console.log(chalk.blue.bold('🚀 Creating GraphQL Resource...'))
     console.log(chalk.dim('====================================='))
 
+    const EVENT_NAME = type === 'subscription' ? `${name.toUpperCase()}_EVENT` : null
+
     // 필요한 파일들 생성
     const files = [
       {
         name: `${name}.graphql`,
-        content: `${type} ${name}(
+        content: type === 'subscription' 
+          ? `subscription ${name}($id: Int) {
+  ${name}(id: $id) {
+    id
+    title
+    description
+  }
+}
+`
+          : `${type} ${name}(
   $id: Int!
   $isActive: Boolean!
   $description: String!
@@ -158,14 +173,28 @@ const create = async (options: CreateOptions) => {
     isAvailable
   }
 }
-\n`,
+`,
       },
       {
         name: `${name}.resolvers.ts`,
-        content: `import type { Context } from '@/graphql/type'
-import { ${capitalize(name)}${capitalize(
-          type,
-        )}Variables } from '@/generated/graphql'
+        content: type === 'subscription'
+          ? `import type { Context } from '@/graphql/type'
+
+export const ${EVENT_NAME} = '${EVENT_NAME}'
+
+const resolvers = {
+  Subscription: {
+    ${name}: {
+      subscribe: (_parent: unknown, _args: unknown, context: Context) => 
+        context.pubsub.asyncIterator([${EVENT_NAME}])
+    }
+  }
+}
+
+export default resolvers
+`
+          : `import type { Context } from '@/graphql/type'
+import { ${capitalize(name)}${capitalize(type)}Variables } from '@/generated/graphql'
 
 const resolvers = {
   ${capitalize(type)}: {
@@ -182,14 +211,29 @@ const resolvers = {
       }
     },
   },
-}\n
+}
 
 export default resolvers
 `,
       },
       {
         name: `${name}.typeDefs.ts`,
-        content: `import { gql } from 'graphql-tag'
+        content: type === 'subscription'
+          ? `import { gql } from 'graphql-tag'
+
+export default gql\`
+  type Subscription {
+    ${name}(id: Int): ${capitalize(name)}Result!
+  }
+
+  type ${capitalize(name)}Result {
+    id: Int!
+    title: String!
+    description: String!
+  }
+\`
+`
+          : `import { gql } from 'graphql-tag'
 
 export default gql\`
   type ${name}Result {
@@ -206,7 +250,8 @@ export default gql\`
       amount: Float!
     ): ${name}Result!
   }
-\`\n`,
+\`
+`,
       },
     ]
 
@@ -223,7 +268,11 @@ export default gql\`
 
     // 생성된 파일 정보 수집
     const createdFiles = [
-      { file: `${name}.graphql`, type: 'Query Definition', status: '✅' },
+      { 
+        file: `${name}.graphql`, 
+        type: `${capitalize(type)} Definition`, 
+        status: '✅' 
+      },
       { file: `${name}.resolvers.ts`, type: 'Resolver', status: '✅' },
       { file: `${name}.typeDefs.ts`, type: 'Type Definition', status: '✅' },
     ]
