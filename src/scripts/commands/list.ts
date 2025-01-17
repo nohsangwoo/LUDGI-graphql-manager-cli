@@ -4,7 +4,7 @@ import { Table } from 'console-table-printer'
 import chalk from 'chalk'
 
 interface ListOptions {
-  search?: string
+  search?: string;
 }
 
 const getOperationType = (resolverPath: string): string => {
@@ -29,10 +29,13 @@ const list = async (options: ListOptions) => {
     console.log(chalk.blue.bold('📋 GraphQL Resources List'))
     console.log(chalk.dim('====================================='))
 
-    const graphqlPath = path.join(process.cwd(), 'src/graphql')
+    const graphqlPath = path.join(process.cwd(), 'server/graphql')
 
     if (!fs.existsSync(graphqlPath)) {
-      console.error(chalk.red('❌ GraphQL directory not found:'), chalk.dim(graphqlPath))
+      console.error(
+        chalk.red('❌ GraphQL directory not found:'),
+        chalk.dim(graphqlPath),
+      )
       return
     }
 
@@ -65,7 +68,7 @@ const list = async (options: ListOptions) => {
       columns: [
         { name: 'resource', title: 'Resource', alignment: 'left' },
         { name: 'type', title: 'Type', alignment: 'center' },
-        { name: 'files', title: 'Files', alignment: 'center' }
+        { name: 'files', title: 'Files', alignment: 'center' },
       ],
     })
 
@@ -73,13 +76,13 @@ const list = async (options: ListOptions) => {
       const dirPath = path.join(graphqlPath, dir)
       const files = fs.readdirSync(dirPath)
       const resolverFile = files.find(file => file.endsWith('.resolvers.ts'))
-      
+
       let type = '📄 Type Only'
       if (resolverFile) {
         const resolverPath = path.join(dirPath, resolverFile)
         type = getOperationType(resolverPath)
       }
-      
+
       table.addRow({
         resource: dir,
         type: type,
@@ -102,7 +105,7 @@ const list = async (options: ListOptions) => {
 
     // 폴더 구조 출력
     console.log('\n📂 Resource Structure:')
-    console.log(chalk.dim('src/graphql/'))
+    console.log(chalk.dim('server/graphql/'))
     directories.forEach(dir => {
       const files = fs.readdirSync(path.join(graphqlPath, dir))
       console.log(chalk.dim(`└── ${dir}/`))
@@ -113,7 +116,6 @@ const list = async (options: ListOptions) => {
 
     console.log('\n')
     console.log(chalk.dim('====================================='))
-
   } catch (error) {
     console.log('\n')
     console.error(chalk.red.bold('❌ Error listing GraphQL resources:'))

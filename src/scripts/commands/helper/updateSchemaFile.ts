@@ -18,12 +18,12 @@ const getAllFiles = (dirPath: string, extension: string): string[] => {
 }
 
 const updateSchemaFile = async () => {
-  const schemaPath = path.join(process.cwd(), 'src/graphql/schema.ts')
+  const schemaPath = path.join(process.cwd(), 'server/graphql/schema.ts')
   // let schemaContent = fs.readFileSync(schemaPath, 'utf-8')
 
   // console.log('schemaContent:', schemaContent)
 
-  const graphqlPath = path.join(process.cwd(), 'src/graphql')
+  const graphqlPath = path.join(process.cwd(), 'server/graphql')
   const resolverFiles = getAllFiles(graphqlPath, '.resolvers.ts')
   const typeDefFiles = getAllFiles(graphqlPath, '.typeDefs.ts')
 
@@ -57,6 +57,8 @@ const updateSchemaFile = async () => {
   const newSchemaContent = `
 import { mergeResolvers, mergeTypeDefs } from '@graphql-tools/merge'
 import { makeExecutableSchema } from '@graphql-tools/schema'
+import { GraphQLSchema } from 'graphql'
+
 ${resolversImports}
 ${typeDefsImports}
 
@@ -68,10 +70,27 @@ export const typeDefs = mergeTypeDefs([
 ${typeDefsArray}
 ])
 
-export const schema = makeExecutableSchema({
-  resolvers,
-  typeDefs,
-})
+let schema: GraphQLSchema;
+
+try {
+  schema = makeExecutableSchema({
+    resolvers,
+    typeDefs,
+  });
+} catch (error) {
+  console.error('GraphQL 스키마 생성 중 오류 발생:', error);
+  // 기본 스키마를 설정하거나 빈 스키마를 설정하여 서버가 계속 실행되도록 함
+  schema = makeExecutableSchema({
+    typeDefs: \`
+      type Query {
+        _empty: String
+      }
+    \`,
+    resolvers: {},
+  });
+}
+
+export { schema };
   `
 
   fs.writeFileSync(schemaPath, newSchemaContent)

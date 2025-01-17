@@ -17,7 +17,7 @@ const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
 const updateApisFile = async () => {
   const apisPath = path.join(process.cwd(), 'src/graphql/apis.ts')
-  const graphqlPath = path.join(process.cwd(), 'src/graphql')
+  const graphqlPath = path.join(process.cwd(), 'server/graphql')
 
   // 디렉토리만 필터링
   const directories = fs
@@ -47,7 +47,7 @@ ${directories.join(',\n')}
 
 const create = async (options: CreateOptions) => {
   const { name } = options
-  const graphqlPath = path.join(process.cwd(), 'src/graphql')
+  const graphqlPath = path.join(process.cwd(), 'server/graphql')
   const domainPath = path.join(graphqlPath, name)
 
   // 롤백을 위한 상태 추적
@@ -85,7 +85,7 @@ const create = async (options: CreateOptions) => {
 
   try {
     // 도메인 디렉토리 생성 전에 schema.ts와 apis.ts 백업
-    const schemaPath = path.join(process.cwd(), 'src/graphql/schema.ts')
+    const schemaPath = path.join(process.cwd(), 'server/graphql/schema.ts')
     const apisPath = path.join(process.cwd(), 'src/graphql/apis.ts')
 
     if (fs.existsSync(schemaPath)) {
@@ -178,7 +178,7 @@ const create = async (options: CreateOptions) => {
       {
         name: `${name}.resolvers.ts`,
         content: type === 'subscription'
-          ? `import type { Context } from '@/graphql/type'
+          ? `import type { Context } from '../type'
 
 export const ${EVENT_NAME} = '${EVENT_NAME}'
 
@@ -193,8 +193,8 @@ const resolvers = {
 
 export default resolvers
 `
-          : `import type { Context } from '@/graphql/type'
-import { ${capitalize(name)}${capitalize(type)}Variables } from '@/generated/graphql'
+          : `import type { Context } from '../type'
+import { ${capitalize(name)}${capitalize(type)}Variables } from '../../generated/graphql'
 
 const resolvers = {
   ${capitalize(type)}: {
@@ -277,11 +277,15 @@ export default gql\`
       { file: `${name}.typeDefs.ts`, type: 'Type Definition', status: '✅' },
     ]
 
+    await new Promise(resolve => setTimeout(resolve, 3000)); // 3초 대기
+
     // npm run generate 실행
     console.log(chalk.yellow('\n📦 Generating GraphQL Types...'))
     const { stdout, stderr } = await execPromise('npm run generate', {
       shell: 'bash',
     })
+
+
 
     // apis.ts 파일 업데이트
     await updateApisFile()
@@ -305,7 +309,7 @@ export default gql\`
 
     // 폴더 구조 출력
     console.log('\n📂 Folder Structure:')
-    console.log(chalk.dim('src/graphql/'))
+    console.log(chalk.dim('server/graphql/'))
     console.log(chalk.dim(`└── ${name}/`))
     createdFiles.forEach(file => {
       console.log(chalk.dim(`    └── ${file.file}`))
@@ -332,7 +336,7 @@ export default gql\`
 
     // 롤백 실행
     try {
-      await rollback()
+      // await rollback()
     } catch (rollbackError) {
       console.error(chalk.red.bold('❌ Error during rollback:'))
       console.error(chalk.red(rollbackError))

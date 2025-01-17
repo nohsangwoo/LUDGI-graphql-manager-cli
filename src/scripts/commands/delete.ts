@@ -25,7 +25,7 @@ const getOperationType = (resolverPath: string): string => {
 
 const updateApisFile = async () => {
   const apisPath = path.join(process.cwd(), 'src/graphql/apis.ts')
-  const graphqlPath = path.join(process.cwd(), 'src/graphql')
+  const graphqlPath = path.join(process.cwd(), 'server/graphql')
 
   const directories = fs
     .readdirSync(graphqlPath)
@@ -88,7 +88,7 @@ const deleteGraphql = async () => {
     console.log(chalk.red.bold('🗑️  Delete GraphQL Resource'))
     console.log(chalk.dim('====================================='))
 
-    const graphqlPath = path.join(process.cwd(), 'src/graphql')
+    const graphqlPath = path.join(process.cwd(), 'server/graphql')
     const directories = fs.readdirSync(graphqlPath).filter(item => {
       const isDirectory = fs
         .statSync(path.join(graphqlPath, item))
@@ -179,7 +179,7 @@ const deleteGraphql = async () => {
       }
 
       // schema.ts와 apis.ts 백업
-      const schemaPath = path.join(process.cwd(), 'src/graphql/schema.ts')
+      const schemaPath = path.join(process.cwd(), 'server/graphql/schema.ts')
       const apisPath = path.join(process.cwd(), 'src/graphql/apis.ts')
 
       if (fs.existsSync(schemaPath)) {
@@ -206,6 +206,8 @@ const deleteGraphql = async () => {
         // schema.ts 파일 업데이트
         await updateSchemaFile()
         console.log('schema.ts updated')
+
+        await new Promise(resolve => setTimeout(resolve, 3000)) // 3초 대기
 
         // npm run generate 실행
         console.log(chalk.yellow('\n📦 Updating GraphQL types...'))
