@@ -26,6 +26,7 @@
     "chalk": "^5.4.1",
     "commander": "^13.0.0",
     "console-table-printer": "^2.12.1",
+    "dotenv": "^16.4.7",
     "figlet": "^1.8.0",
     "inquirer": "^12.3.0",
     "nodemon": "^3.1.9",
