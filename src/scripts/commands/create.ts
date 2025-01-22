@@ -155,7 +155,7 @@ const create = async (options: CreateOptions) => {
 import { expressRedisPubsub } from '../../lib/expressRedisPubsub'
 import { ${capitalize(name)}Payload, ${capitalize(name)}${capitalize(
                 type,
-              )}Variables } from '../../generated/graphql'
+              )}Variables, ${capitalize(name)}Result } from '../../generated/graphql'
 export const ${EVENT_NAME} = '${EVENT_NAME}'
 
 const resolvers = {
@@ -180,7 +180,7 @@ export default resolvers
             : `import type { Context } from '../type'
 import { ${capitalize(name)}${capitalize(
                 type,
-              )}Variables } from '../../generated/graphql'
+              )}Variables, ${capitalize(name)}Result } from '../../generated/graphql'
 
 const resolvers = {
   ${capitalize(type)}: {
