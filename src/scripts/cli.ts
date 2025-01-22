@@ -40,7 +40,7 @@ async function main() {
     const program = new Command()
 
     program
-      .version('1.0.0')
+      .version('3.0.1')
       .description('An example CLI for managing a directory')
       .option('-n, --new <value>', 'Create a new GraphQL resource')
       .option('-d, --delete', 'Delete a GraphQL resource')
