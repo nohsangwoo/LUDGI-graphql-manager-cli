@@ -9,17 +9,20 @@ Manage your GraphQL resources effortlessly with Ludgi CLI
 ```
 
 ---
----
 
 # **Ludgi CLI**
 
 **Ludgi CLI** is a powerful, intuitive, and developer-friendly Command Line Interface (CLI) tool designed for managing GraphQL resources with ease. Whether you're working on a small project or a large-scale application, **Ludgi CLI** provides the tools you need to streamline your GraphQL workflow.
 
+
 ---
 
-## **Project-Specific Notice**
+## **Project-Specific Notice**  
 
-**Important:** Ludgi CLI is specifically designed to work exclusively with the [Ludgi Next.js Project](https://github.com/nohsangwoo/ludgi-nextjs). This means all functionalities and commands are tailored to integrate seamlessly within this project. If you attempt to use Ludgi CLI outside of this project, it will not function as expected.
+**Important:**  
+The [Ludgi Next.js Project](https://github.com/nohsangwoo/ludgi-nextjs) is a **reference project** that demonstrates various ways to utilize GraphQL-related modules. It serves as an example of how to integrate different approaches, and a dedicated course covering these use cases is currently in development.  
+
+If you want to use GraphQL purely with CLI-based integration, refer to the [Ludgi-GraphX](https://github.com/nohsangwoo/Ludgi-GraphX) project. This project is specifically designed for setting up a new GraphQL project using GraphQL CLI, making it a suitable starting point for CLI-based GraphQL development.
 
 ---
 
