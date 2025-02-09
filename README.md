@@ -31,7 +31,7 @@ If you want to use GraphQL purely with CLI-based integration, refer to the [Ludg
 To get started, install Ludgi CLI as a development dependency:
 
 ```bash
-npm install ludgi --save-dev
+npm install ludgi-cli --save-dev
 ```
 
 ---
